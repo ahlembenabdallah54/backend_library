@@ -15,16 +15,18 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      secretOrKey: configSer.get('SECRET_KEY')
+      secretOrKey: configSer.get<string>('JWT_SECRET')
     });
   }
 
   async validate(payload: any) {
-    console.log(payload);
-    let u = await this.userRepo.findOne({ where: { id: payload.id } });
-    console.log(u);
-    
+    const u = await this.userRepo.findOne({
+      where: { id: payload.u }, 
+    });
 
-    return { userRole: u.role, userId : u.id };
-  }
+    return {
+      userId: u.id,
+      userRole: u.role,
+    };
+}
 }

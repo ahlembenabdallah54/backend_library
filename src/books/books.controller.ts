@@ -38,6 +38,7 @@ export class BooksController {
   //@UseGuards(IsAdminGuard)
   @Post('/new')
   async ajouterLivre(@Req() req: Request, @Body() body) {
+    console.log('USER',req["user"]);
     let data = await this.bookSer.addBook(body, req["user"]["userId"]);
     return { data };
   }
@@ -52,7 +53,7 @@ export class BooksController {
 
   @Put('/edit/:id')
   async modifierBook(@Body() body, @Param('id', ParseIntPipe) id) {
-    let response = await this.bookSer.updateBook(body, id);
+    let response = await this.bookSer.updateBook(id, body);
     return response;
   }
 

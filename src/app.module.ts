@@ -16,34 +16,39 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 
 @Module({
   imports: [
+    //  IMPORTANT : toujours en premier
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
+
     TasksModule,
     BooksModule,
+    AuthModule,
+
+    //  CONFIG DATABASE PROPRE
     TypeOrmModule.forRoot({
       type: 'mysql',
-      host: process.env.HOST,
-      port: Number(process.env.PORT),
-      username: 'root',
-      password: 'root',
-      database: 'isids26',
+      host: process.env.DB_HOST,
+      port: Number(process.env.DB_PORT),
+      username: process.env.DB_USERNAME,
+      password: process.env.DB_PASSWORD,
+      database: process.env.DB_NAME,
       autoLoadEntities: true,
       synchronize: true,
     }),
-    AuthModule,
-    ConfigModule.forRoot()
   ],
   controllers: [AppController],
   providers: [AppService],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    // consumer.apply(FirstMiddleware).forRoutes(''); // appliqué pour toutes les routes
-    // consumer.apply(FirstMiddleware).forRoutes('tasks/*'); // appliqué pour toutes les routes
     consumer.apply(SecondMiddleware).forRoutes('');
+
     consumer.apply(FirstMiddleware).forRoutes({
       path: 'tasks/*',
       method: RequestMethod.GET,
     });
   }
-  
-  constructor(private configSer : ConfigService) {}
+
+  constructor(private configSer: ConfigService) {}
 }

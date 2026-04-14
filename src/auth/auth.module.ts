@@ -17,7 +17,7 @@ JwtModule.register(
         }
     }
 ),
-PassportModule.register({defaultStrategy : 'Jwt'})],
+PassportModule.register({defaultStrategy : 'JWT'})],
   providers: [AuthService, JwtStrategy],
   controllers: [AuthController]
 })

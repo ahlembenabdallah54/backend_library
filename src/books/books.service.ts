@@ -66,6 +66,10 @@ export class BooksService {
       //   image: uBook.image,
       ...uBook,
     });
+    console.log('PRELOAD RESULT:', b);
+    if (!b) {
+      throw new NotFoundException('Book not found');
+    }
     let response = await this.bookRepo.save(b);
     return { message: 'Livre mise à jour', response };
   }
