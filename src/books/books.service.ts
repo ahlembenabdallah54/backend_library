@@ -11,12 +11,15 @@ export class BooksService {
 
   async getAllBooks() {
     try {
-      let tab = await this.bookRepo.find(
-        {
-            loadRelationIds : true
-        }
-      );
-      return { listeBooks: tab };
+      let tab = await this.bookRepo.find();
+      return {
+        listeBooks: tab.map(book => ({
+          ...book,
+          image: book.image
+            ? `http://localhost:3000/${book.image}`
+            : null,
+        })),
+      };
     } catch (err) {
       return { message: 'Problème avec TypeOrm' };
     }

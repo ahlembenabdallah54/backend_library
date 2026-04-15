@@ -13,6 +13,8 @@ import { SecondMiddleware } from './middlewares/second/second.middleware';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { join } from 'path';
+import { ServeStaticModule } from '@nestjs/serve-static';
 
 @Module({
   imports: [
@@ -35,6 +37,13 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
       database: process.env.DB_NAME,
       autoLoadEntities: true,
       synchronize: true,
+    }),
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'uploads'),
+      serveRoot: '/',
+      serveStaticOptions: {
+        index: false,
+      },
     }),
   ],
   controllers: [AppController],

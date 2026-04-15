@@ -11,12 +11,15 @@ import {
   Put,
   Query,
   Req,
-  UseGuards,
+  UseGuards,UploadedFile, UseInterceptors
 } from '@nestjs/common';
 import { BooksService } from './books.service';
 import { JwtAuthGuard } from 'src/guards/jwt-auth/jwt-auth.guard';
 import { request } from 'express';
 import { IsAdminGuard } from 'src/guards/is-admin/is-admin.guard';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import { extname } from 'path';
 
 
 @Controller('books')
@@ -26,7 +29,7 @@ export class BooksController {
 
   @Get('/all')
   async chercherTousLesLivres(@Req() req: Request) {
-    console.log(req);
+    //console.log(req);
     try {
       let data = await this.bookSer.getAllBooks();
       return data;
@@ -34,14 +37,51 @@ export class BooksController {
       console.log(err);
     }
   }
-  @UseGuards(JwtAuthGuard, IsAdminGuard)
+  //@UseGuards(JwtAuthGuard, IsAdminGuard)
   //@UseGuards(IsAdminGuard)
-  @Post('/new')
+  /*@Post('/new')
   async ajouterLivre(@Req() req: Request, @Body() body) {
     console.log('USER',req["user"]);
     let data = await this.bookSer.addBook(body, req["user"]["userId"]);
     return { data };
+  }*/
+  //@UseGuards(JwtAuthGuard, IsAdminGuard)
+  @Post('/new')
+  @UseInterceptors(
+    FileInterceptor('image', {
+      storage: diskStorage({
+        destination: './uploads',
+        filename: (req, file, cb) => {
+          const uniqueName =
+            Date.now() + '-' + Math.round(Math.random() * 1e9);
+
+          cb(null, uniqueName + extname(file.originalname));
+        },
+      }),
+    }),
+  )
+  async ajouterLivre(
+    @Req() req: Request,
+    @Body() body,
+    @UploadedFile() file: any,
+  ) {
+    console.log('USER:', req["user"]);
+
+    const image = file ? file.filename : null;
+
+    const userId = req["user"]?.userId || null;
+
+    const data = await this.bookSer.addBook(
+      {
+        ...body,
+        image,
+      },
+      userId,
+    );
+
+    return { data };
   }
+
 
   @UseGuards(JwtAuthGuard)
   @Get('/search/:id')
