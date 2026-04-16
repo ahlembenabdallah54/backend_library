@@ -54,7 +54,7 @@ export class AuthService {
         let resultMatching = await bcrypt.compare(password, user.password);
         
         if(resultMatching) {
-            let token = this.jwtSer.sign({id:  user.id})
+            let token = this.jwtSer.sign({ id: user.id, username: user.username })
             return {
                 ...user,
                 access_token : token
