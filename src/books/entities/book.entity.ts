@@ -1,7 +1,8 @@
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { TimeStampISIDS } from "../shared/timestamp";
 import { AuthorEntity } from "./author.entity";
 import { UserEntity } from "src/auth/entities/user.entity";
+import { Favorite } from "./favorite.entity";
 
 
 @Entity('livre')
@@ -42,6 +43,7 @@ export class BookEntity extends TimeStampISIDS {
     @ManyToOne(type => UserEntity, user => user.id)
     user;
     
-   
+   @OneToMany(() => Favorite, fav => fav.book)
+    favorites: Favorite[];
     
 }

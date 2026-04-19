@@ -1,4 +1,5 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Favorite } from './entities/favorite.entity';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { BookEntity } from './entities/book.entity';
 import { Repository } from 'typeorm';
@@ -7,6 +8,7 @@ import { Repository } from 'typeorm';
 export class BooksService {
   constructor(
     @InjectRepository(BookEntity) private bookRepo: Repository<BookEntity>,
+    @InjectRepository(Favorite) private favoriteRepo: Repository<Favorite>,
   ) {}
 
   async getAllBooks() {
@@ -137,10 +139,66 @@ async softRemoveBook(selectedId) {
     .getRawMany()
   }
     
+    //add book to favorites
+    async addFavorite(userId: number, bookId: number) {
+      const existing = await this.favoriteRepo.findOne({
+        where: {
+          user: { id: userId },
+          book: { id: bookId }
+        }
+      });
+
+      if (existing) {
+        throw new BadRequestException('Already in favorites');
+      }
+
+      const favorite = this.favoriteRepo.create({
+        user: { id: userId },
+        book: { id: bookId }
+      });
+
+      return await this.favoriteRepo.save(favorite);
+}
+
+//remove book from favorites
+    async removeFavorite(userId: number, bookId: number) {
+      const Favorite = await this.favoriteRepo.findOne({
+        where: {
+          user: { id: userId },
+          book: { id: bookId }
+        }
+      });
+      if (!Favorite) {
+        throw new NotFoundException('Not in favorites');
+      }
+      await this.favoriteRepo.remove(Favorite);
+      return { message: 'Removed from favorites' };
+    } 
+
+    //check if books is in favorites
+    async isFavorite(userId: number, bookId: number) {
+      const Favorite = await this.favoriteRepo.findOne({
+        where: {
+          user: { id: userId },
+          book: { id: bookId }
+        }
+      });
+      return { isFavorite: !!Favorite };
+    }
     
-    
-    
-    
+    //get user's favorite books
+    async getUserFavorites(userId: number) {
+      const favorites = await this.favoriteRepo.find({
+        where: {
+          user: { id: userId },
+        },
+        relations: {
+          book: true,
+        },
+      });
+
+      return favorites.map(f => f.book);
+    }
     
     
   

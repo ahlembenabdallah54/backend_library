@@ -45,7 +45,7 @@ export class BooksController {
     let data = await this.bookSer.addBook(body, req["user"]["userId"]);
     return { data };
   }*/
-  //@UseGuards(JwtAuthGuard, IsAdminGuard)
+  @UseGuards(JwtAuthGuard, IsAdminGuard)
   @Post('/new')
   @UseInterceptors(
     FileInterceptor('image', {
@@ -134,5 +134,44 @@ export class BooksController {
   async nbreLivresParAnneeV2(@Query('year1') year1, @Query('year2') year2) {
     let response = await this.bookSer.nbBooksPerYearV2(year1, year2);
     return response;
+  }
+  //add book to favorites
+   @UseGuards(JwtAuthGuard)
+  @Post('favorites/:bookId')
+  addFavorite(
+    @Param('bookId', ParseIntPipe) bookId: number,
+    @Req() req
+  ) {
+    const userId = req['user'].userId; 
+    console.log(userId);
+    return this.bookSer.addFavorite(userId, bookId);
+  }
+
+  //delete book from favorites
+   @UseGuards(JwtAuthGuard)
+  @Delete('favorites/:bookId')
+  removeFavorite(
+    @Param('bookId', ParseIntPipe) bookId: number,
+    @Req() req
+  ) {
+    const userId = req['user'].userId; 
+    return this.bookSer.removeFavorite(userId, bookId);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('favorites/:bookId')
+  isFavorite(
+    @Param('bookId', ParseIntPipe) bookId: number,
+    @Req() req
+  ) {
+    const userId = req['user'].userId; 
+    return this.bookSer.isFavorite(userId, bookId);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('favorites')
+  getUserFavorites(@Req() req) {
+    const userId = req['user'].userId;
+    return this.bookSer.getUserFavorites(userId);
   }
 }
