@@ -1,5 +1,6 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { Roles } from '../generics/role.enum';
+import { Favorite } from 'src/books/entities/favorite.entity';
 
 @Entity('user')
 export class UserEntity {
@@ -29,5 +30,6 @@ export class UserEntity {
   })
   role ;
   
-  
+  @OneToMany(() => Favorite, fav => fav.user)
+  favorites: Favorite[];
 }
